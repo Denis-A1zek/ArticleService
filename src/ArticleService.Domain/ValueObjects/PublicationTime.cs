@@ -15,8 +15,6 @@ public class PublicationTime : ValueObject
 
     public static Result<PublicationTime> Create(DateTime start, DateTime end)
     {
-        if (start.ToUniversalTime() < DateTime.UtcNow)
-            return Result.Failure<PublicationTime>("fff");
         var time = new PublicationTime(start, end);
         return Result.Success<PublicationTime>(time);
     }

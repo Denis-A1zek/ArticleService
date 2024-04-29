@@ -29,9 +29,15 @@ public class AtricleConfiguration : IEntityTypeConfiguration<Article>
             .HasColumnName("description")
             .IsRequired();
 
-        builder.HasOne(a => a.ArticlesPending)
-            .WithOne(ap => ap.Article)
-            .HasForeignKey<ArticlesPending>(ap => ap.ArticleId);
+        builder.ComplexProperty(
+            ap => ap.PublicationTime,
+            b =>
+            {
+                b.Property(p => p.Start).HasColumnName("start_date");
+                b.Property(p => p.End).HasColumnName("end_date");
+            });
+        
+        builder.Property(ap => ap.Checked).HasColumnName("reviewed");
 
         builder.Property(a => a.ImageUrl)
             .HasColumnName("image_url");
@@ -44,11 +50,6 @@ public class AtricleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(a => a.UpdatedAt)
             .HasColumnName("upated_at");
-
-        builder.Property(a => a.CreatedBy)
-            .HasColumnName("created_by");
-
-        builder.Property(a => a.UpdatedBy)
-            .HasColumnName("updated_by");
+        
     }
 }

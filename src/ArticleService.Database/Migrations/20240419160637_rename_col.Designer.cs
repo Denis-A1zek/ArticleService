@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ArticleService.Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240330110353_Init")]
-    partial class Init
+    [Migration("20240419160637_rename_col")]
+    partial class rename_col
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,13 +39,13 @@ namespace ArticleService.Database.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("annotation");
 
+                    b.Property<bool>("Checked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reviewed");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -67,44 +67,11 @@ namespace ArticleService.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("upated_at");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("updated_by");
-
                     b.Property<int>("Views")
                         .HasColumnType("integer")
                         .HasColumnName("views");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("articles", (string)null);
-                });
-
-            modelBuilder.Entity("ArticleService.Domain.Entities.ArticlesPending", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ArticleId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_id");
-
-                    b.Property<string>("RejectionMessage")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("rejection_message");
-
-                    b.Property<bool>("Reviewed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("reviewed");
-
-                    b.Property<Guid?>("Reviewer")
-                        .HasColumnType("uuid")
-                        .HasColumnName("reviewer");
-
-                    b.ComplexProperty<Dictionary<string, object>>("PublicationTime", "ArticleService.Domain.Entities.ArticlesPending.PublicationTime#PublicationTime", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("PublicationTime", "ArticleService.Domain.Entities.Article.PublicationTime#PublicationTime", b1 =>
                         {
                             b1.IsRequired();
 
@@ -119,17 +86,56 @@ namespace ArticleService.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("articles", (string)null);
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.ArticleLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("upated_at");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Status", "ArticleService.Domain.Entities.ArticleLog.Status#Status", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("status");
+                        });
+
+                    b.HasKey("Id");
+
                     b.HasIndex("ArticleId")
                         .IsUnique();
 
-                    b.ToTable("articles_pending", (string)null);
+                    b.ToTable("article_logs", (string)null);
                 });
 
-            modelBuilder.Entity("ArticleService.Domain.Entities.ArticlesPending", b =>
+            modelBuilder.Entity("ArticleService.Domain.Entities.ArticleLog", b =>
                 {
                     b.HasOne("ArticleService.Domain.Entities.Article", "Article")
-                        .WithOne("ArticlesPending")
-                        .HasForeignKey("ArticleService.Domain.Entities.ArticlesPending", "ArticleId")
+                        .WithOne("Log")
+                        .HasForeignKey("ArticleService.Domain.Entities.ArticleLog", "ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -138,7 +144,7 @@ namespace ArticleService.Database.Migrations
 
             modelBuilder.Entity("ArticleService.Domain.Entities.Article", b =>
                 {
-                    b.Navigation("ArticlesPending");
+                    b.Navigation("Log");
                 });
 #pragma warning restore 612, 618
         }

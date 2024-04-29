@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ArticleService.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,10 +21,11 @@ namespace ArticleService.Database.Migrations
                     description = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: false),
                     image_url = table.Column<string>(type: "text", nullable: true),
                     views = table.Column<int>(type: "integer", nullable: false),
+                    reviewed = table.Column<bool>(type: "boolean", nullable: false),
                     created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     upated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    updated_by = table.Column<Guid>(type: "uuid", nullable: false)
+                    end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,32 +33,31 @@ namespace ArticleService.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "articles_pending",
+                name: "article_logs",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    reviewed = table.Column<bool>(type: "boolean", nullable: false),
-                    article_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    reviewer = table.Column<Guid>(type: "uuid", nullable: true),
-                    rejection_message = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
-                    end_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    start_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    ArticleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    reason = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: true),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    upated_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    status = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_articles_pending", x => x.id);
+                    table.PrimaryKey("PK_article_logs", x => x.id);
                     table.ForeignKey(
-                        name: "FK_articles_pending_articles_article_id",
-                        column: x => x.article_id,
+                        name: "FK_article_logs_articles_ArticleId",
+                        column: x => x.ArticleId,
                         principalTable: "articles",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_articles_pending_article_id",
-                table: "articles_pending",
-                column: "article_id",
+                name: "IX_article_logs_ArticleId",
+                table: "article_logs",
+                column: "ArticleId",
                 unique: true);
         }
 
@@ -65,7 +65,7 @@ namespace ArticleService.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "articles_pending");
+                name: "article_logs");
 
             migrationBuilder.DropTable(
                 name: "articles");

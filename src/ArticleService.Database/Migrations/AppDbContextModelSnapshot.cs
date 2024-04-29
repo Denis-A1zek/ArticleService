@@ -36,13 +36,13 @@ namespace ArticleService.Database.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("annotation");
 
+                    b.Property<bool>("Checked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("reviewed");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -64,44 +64,14 @@ namespace ArticleService.Database.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("upated_at");
 
-                    b.Property<Guid>("UpdatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("updated_by");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Views")
                         .HasColumnType("integer")
                         .HasColumnName("views");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("articles", (string)null);
-                });
-
-            modelBuilder.Entity("ArticleService.Domain.Entities.ArticlesPending", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<Guid>("ArticleId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("article_id");
-
-                    b.Property<string>("RejectionMessage")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("rejection_message");
-
-                    b.Property<bool>("Reviewed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("reviewed");
-
-                    b.Property<Guid?>("Reviewer")
-                        .HasColumnType("uuid")
-                        .HasColumnName("reviewer");
-
-                    b.ComplexProperty<Dictionary<string, object>>("PublicationTime", "ArticleService.Domain.Entities.ArticlesPending.PublicationTime#PublicationTime", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("PublicationTime", "ArticleService.Domain.Entities.Article.PublicationTime#PublicationTime", b1 =>
                         {
                             b1.IsRequired();
 
@@ -116,26 +86,216 @@ namespace ArticleService.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
+                    b.ToTable("articles", (string)null);
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.ArticleLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("ArticleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("article_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("upated_at");
+
+                    b.ComplexProperty<Dictionary<string, object>>("Status", "ArticleService.Domain.Entities.ArticleLog.Status#Status", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("status");
+                        });
+
+                    b.HasKey("Id");
+
                     b.HasIndex("ArticleId")
                         .IsUnique();
 
-                    b.ToTable("articles_pending", (string)null);
+                    b.ToTable("article_logs", (string)null);
                 });
 
-            modelBuilder.Entity("ArticleService.Domain.Entities.ArticlesPending", b =>
+            modelBuilder.Entity("ArticleService.Domain.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("0662dff7-d8bc-7937-8000-f24ee5eb7e3a"),
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Id = new Guid("0662dff7-d8bc-7972-8000-2ec8f72ac243"),
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("0662dff7-d8bc-7977-8000-df864f1e5189"),
+                            Name = "Moderator"
+                        });
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.User", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("login");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("password");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("upated_at");
+
+                    b.Property<Guid>("UserTokenId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_token_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.UserToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("RefreshToken")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("refresh_token");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("refresh_token_time");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("users_token", (string)null);
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.Article", b =>
+                {
+                    b.HasOne("ArticleService.Domain.Entities.User", "User")
+                        .WithMany("Articles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.ArticleLog", b =>
                 {
                     b.HasOne("ArticleService.Domain.Entities.Article", "Article")
-                        .WithOne("ArticlesPending")
-                        .HasForeignKey("ArticleService.Domain.Entities.ArticlesPending", "ArticleId")
+                        .WithOne("Log")
+                        .HasForeignKey("ArticleService.Domain.Entities.ArticleLog", "ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Article");
                 });
 
+            modelBuilder.Entity("ArticleService.Domain.Entities.User", b =>
+                {
+                    b.HasOne("ArticleService.Domain.Entities.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.UserToken", b =>
+                {
+                    b.HasOne("ArticleService.Domain.Entities.User", "User")
+                        .WithOne("Token")
+                        .HasForeignKey("ArticleService.Domain.Entities.UserToken", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ArticleService.Domain.Entities.Article", b =>
                 {
-                    b.Navigation("ArticlesPending");
+                    b.Navigation("Log");
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("ArticleService.Domain.Entities.User", b =>
+                {
+                    b.Navigation("Articles");
+
+                    b.Navigation("Token");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,6 +10,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Design" Version="1.1.6" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.0" />
+      <PackageReference Include="UuidExtensions" Version="1.2.0" />
     </ItemGroup>
 
     <ItemGroup>
